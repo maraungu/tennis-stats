@@ -21,3 +21,4 @@ def make_soup(link):
     html = get_html(link)
     if ok_to_scrape(link):
         soup = BeautifulSoup(html.text, 'html.parser')
+        print(soup)
