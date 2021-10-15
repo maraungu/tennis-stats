@@ -1,7 +1,32 @@
-from scrape import make_soup
 import cmd
-from player import *
+import readline
+import rlcompleter
 
+from player import *
+from scrape import make_soup
+
+
+# ------- Making autocomplete work on Mac -------
+class TabCompleter(rlcompleter.Completer):
+    """Completer that supports indenting"""
+
+    def complete(self, text, state):
+        if not text:
+            return ('    ', None)[state]
+        else:
+            return rlcompleter.Completer.complete(self, text, state)
+
+
+readline.set_completer(TabCompleter().complete)
+
+if 'libedit' in readline.__doc__:
+    readline.parse_and_bind("bind -e")
+    readline.parse_and_bind("bind '\t' rl_complete")
+else:
+    readline.parse_and_bind("tab: complete")
+
+
+# ----------- Shell commands  -------------------
 
 class TennisPlayersShell(cmd.Cmd):
     """This is a simple shell for interactive tennis stats"""
@@ -10,6 +35,7 @@ class TennisPlayersShell(cmd.Cmd):
     file = None
 
     players = Players()
+    nationality_list = [nat.name for nat in Nationality]
 
     # TODO: add pandas
     # dataframe =
@@ -37,14 +63,26 @@ class TennisPlayersShell(cmd.Cmd):
                 self.players.gender = Gender.male.name
                 self.players.link = 'https://en.wikipedia.org/wiki/List_of_male_singles_tennis_players'
 
-    # TODO: check input validity
     def do_birthyear(self, arg):
         """Choose earliest birth year of players: BIRTHYEAR 1958"""
-        self.players.birthyear = arg
+        if arg < '2010' and arg > '1920':
+            self.players.birthyear = arg
+        else:
+            print('Not a valid earliest birthyear')
 
     def do_nationality(self, arg):
         """Choose player nationality"""
-        self.players.nationality = arg
+        if arg and arg in self.nationality_list:
+            self.players.nationality = arg
+        else:
+            print('Not a valid nationality')
+
+    def complete_nationality(self, text, line, begidx, endidx):
+        if not text:
+            completions = self.nationality_list
+        else:
+            completions = [nat for nat in self.nationality_list if nat.startswith(text)]
+        return completions
 
     # -------- tennis stats commands ----------------
     def do_generatedataframe(self, arg):
