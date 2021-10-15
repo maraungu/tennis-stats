@@ -1,3 +1,4 @@
+aenum==3.1.0
 appnope==0.1.2
 argon2-cffi==21.1.0
 attrs==21.2.0
@@ -62,3 +63,4 @@ webencodings==0.5.1
 wikipedia==1.4.0
 
 click~=8.0.3
+aenum~=3.1.0
