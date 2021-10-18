@@ -3,7 +3,8 @@ import readline
 import rlcompleter
 
 from player import *
-from scrape import make_soup
+from scrape import make_dataframe
+from pandas import DataFrame
 
 
 # ------- Making autocomplete work on Mac -------
@@ -83,13 +84,10 @@ class TennisPlayersShell(cmd.Cmd):
             completions = [nat for nat in self.nationality_list if nat.startswith(text)]
         return completions
 
-    # TODO: add pandas
-    # dataframe =
-
     # -------- tennis stats commands ----------------
     def do_generatedataframe(self, arg):
         if self.players.birthyear >= '1950':
-            make_soup(self.players.link)
+            data = make_dataframe(self.players.link, self.players.gender, self.players.nationality, self.players.birthyear)
 
     # --------- basic commands ----------
     def do_exit(self, arg):
