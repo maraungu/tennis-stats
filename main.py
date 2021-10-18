@@ -2,6 +2,8 @@ import cmd
 import readline
 import rlcompleter
 
+import pandas
+
 from player import *
 from scrape import make_dataframe
 from pandas import DataFrame
@@ -38,6 +40,7 @@ class TennisPlayersShell(cmd.Cmd):
     players = Players()
     nationality_list = [nat.name for nat in Nationality]
     gender_list = [g.name for g in Gender]
+    data = pandas.DataFrame()
 
     # -------- player settings -------------
     def do_showsettings(self, arg):
@@ -87,7 +90,7 @@ class TennisPlayersShell(cmd.Cmd):
     # -------- tennis stats commands ----------------
     def do_generatedataframe(self, arg):
         if self.players.birthyear >= '1950':
-            data = make_dataframe(self.players.link, self.players.gender, self.players.nationality, self.players.birthyear)
+            self.data = make_dataframe(self.players.link, self.players.gender, self.players.nationality, self.players.birthyear)
 
     # --------- basic commands ----------
     def do_exit(self, arg):
