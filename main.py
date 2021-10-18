@@ -36,15 +36,7 @@ class TennisPlayersShell(cmd.Cmd):
 
     players = Players()
     nationality_list = [nat.name for nat in Nationality]
-
-    # TODO: add pandas
-    # dataframe =
-
-    # --------- basic commands ----------
-    def do_exit(self, arg):
-        """Exit the shell"""
-        print('Thank you for using tennis-stats')
-        raise SystemExit()
+    gender_list = [g.name for g in Gender]
 
     # -------- player settings -------------
     def do_showsettings(self, arg):
@@ -62,6 +54,13 @@ class TennisPlayersShell(cmd.Cmd):
             if arg == 'male':
                 self.players.gender = Gender.male.name
                 self.players.link = 'https://en.wikipedia.org/wiki/List_of_male_singles_tennis_players'
+
+    def complete_playergender(self, text, line, begidx, endidx):
+        if not text:
+            completions = self.gender_list
+        else:
+            completions = [g for g in self.gender_list if g.startswith(text)]
+        return completions
 
     def do_birthyear(self, arg):
         """Choose earliest birth year of players: BIRTHYEAR 1958"""
@@ -84,10 +83,19 @@ class TennisPlayersShell(cmd.Cmd):
             completions = [nat for nat in self.nationality_list if nat.startswith(text)]
         return completions
 
+    # TODO: add pandas
+    # dataframe =
+
     # -------- tennis stats commands ----------------
     def do_generatedataframe(self, arg):
         if self.players.birthyear >= '1950':
             make_soup(self.players.link)
+
+    # --------- basic commands ----------
+    def do_exit(self, arg):
+        """Exit the shell"""
+        print('Thank you for using tennis-stats')
+        raise SystemExit()
 
 
 # Press the green button in the gutter to run the script.
