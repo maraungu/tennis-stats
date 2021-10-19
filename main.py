@@ -1,6 +1,7 @@
 import cmd
 import readline
 import rlcompleter
+import pickle
 
 import pandas
 
@@ -43,8 +44,25 @@ class TennisPlayersShell(cmd.Cmd):
     data = pandas.DataFrame()
 
     # -------- player settings -------------
+    def do_showdefaults(self, arg):
+        """Shows the default player parameters for male and female"""
+        if arg == 'female' or arg == 'male':
+            print("gender: {} \n birth year: {} \n nationality: {}".format(arg,
+                                                                           '1950',
+                                                                           'any'))
+        else:
+            print("Not a valid gender")
+
+    def complete_showdefaults(self, text, line, begidx, endidx):
+        if not text:
+            completions = self.gender_list
+        else:
+            completions = [g for g in self.gender_list if g.startswith(text)]
+        return completions
+
+
     def do_showsettings(self, arg):
-        """Shows the default player parameters"""
+        """Shows the current player parameters"""
         print("gender: {} \n birth year: {} \n nationality: {}".format(self.players.gender,
                                                                        self.players.birthyear,
                                                                        self.players.nationality))
@@ -91,6 +109,17 @@ class TennisPlayersShell(cmd.Cmd):
     def do_generatedataframe(self, arg):
         if self.players.birthyear >= '1950':
             self.data = make_dataframe(self.players.link, self.players.gender, self.players.nationality, self.players.birthyear)
+            self.data.to_pickle('females.pkl')
+
+    def do_displaydataframe(self, arg):
+        print(self.data)
+
+    def do_usedefaultframe(self, arg):
+        self.do_showdefaults(arg)
+        if arg == 'female':
+            self.data = pandas.read_pickle('females.pkl')
+        elif arg == 'male':
+            self.data = pandas.read_pickle('males.pkl')
 
     # --------- basic commands ----------
     def do_exit(self, arg):

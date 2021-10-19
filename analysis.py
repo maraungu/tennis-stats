@@ -6,7 +6,6 @@ from scrape import *
 from sklearn.preprocessing import MinMaxScaler
 
 
-
 def plot_dataframe(data, x_axis, y_axis):
     data.plot(y=y_axis, x=x_axis, kind='scatter')
 
@@ -19,7 +18,11 @@ def minmaxscale(data):
     data_scaled = pandas.DataFrame(arr, columns=['career_record', 'highest_ranking'])
     return data_scaled
 
-def gradient_descent(data_scaled):
+
+def gradient_descent(data):
+
+    data_scaled = minmaxscale(data)
+
     X = data_scaled['career_record']
     Y = data_scaled['highest_ranking']
 
@@ -50,3 +53,8 @@ def gradient_descent(data_scaled):
         k = k - L * D_k
 
     print(m, c, k)
+    Y_pred = k * np.exp(m * X + c)
+    plt.scatter(X, Y)
+    plt.scatter(X, Y_pred, color='red')
+
+

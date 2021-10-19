@@ -62,7 +62,7 @@ def make_dataframe(link, gender, nat, birthyear):
     data = clean_dataframe(df, gender, nat)
 
     # ------ birth years filter --------
-    data = data.drop(data[data.Birth < birthyear].index)
+    data = data.drop(data[data.Birth < int(birthyear)].index)
 
     # TODO: introduce a nationality filter as well
 
@@ -199,12 +199,15 @@ def clean_dataframe(df, gender, nat):
     if gender == 'male' and nat == 'any':
         data = df.drop(["Nationality", "Death", "HoF", "Rank[a]", "Highest inclusion criteria"], axis=1)
         clean_data = data[data.Birth != '?']
+        clean_data = clean_data[clean_data.Birth != 'c.1921']
+        clean_data['Birth'] = clean_data['Birth'].astype(int)
     elif gender == 'female' and nat == 'any':
         data = df.drop(["Nationality", "Death", "Grand Slam singles titles", "Notes"], axis=1)
         clean_data = data[~data.wikilink.str.contains("index.php?")]
         # gets rid of NaNs
         # TODO: should get the female players birth years as ints as well
         clean_data = clean_data.dropna()
+        clean_data['Birth'] = clean_data['Birth'].astype(int)
     else:
         print('Not a valid gender')
         raise AttributeError
