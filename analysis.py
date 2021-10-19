@@ -7,11 +7,18 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 def plot_dataframe(data, x_axis, y_axis):
-    data.plot(y=y_axis, x=x_axis, kind='scatter')
+    x = data[x_axis]
+    y = data[y_axis]
+    plt.scatter(x, y)
+    plt.show()
 
+
+def max(column):
+    return column.max(), column.idxmax()
 
 def minmaxscale(data):
-    data_numbers = data.drop(["Name", "Birth", "wikilink", "career_titles"], axis=1)
+    data.astype({'highest_rankings': 'float64'}).dtypes
+    data_numbers = data.drop(["Name", "Birth", "wikilink"], axis=1)
     arr = data_numbers.to_numpy()
     trans = MinMaxScaler()
     arr = trans.fit_transform(arr)
@@ -20,7 +27,6 @@ def minmaxscale(data):
 
 
 def gradient_descent(data):
-
     data_scaled = minmaxscale(data)
 
     X = data_scaled['career_record']
@@ -56,5 +62,6 @@ def gradient_descent(data):
     Y_pred = k * np.exp(m * X + c)
     plt.scatter(X, Y)
     plt.scatter(X, Y_pred, color='red')
+    plt.show()
 
 

@@ -4,9 +4,11 @@ import rlcompleter
 import pickle
 
 import pandas
+import analysis
 
 from player import *
 from scrape import make_dataframe
+from tournaments import *
 from pandas import DataFrame
 
 
@@ -41,17 +43,19 @@ class TennisPlayersShell(cmd.Cmd):
     players = Players()
     nationality_list = [nat.name for nat in Nationality]
     gender_list = [g.name for g in Gender]
+    tour_list = [t.name for t in Tour]
     data = pandas.DataFrame()
 
     # -------- player settings -------------
     def do_showdefaults(self, arg):
-        """Shows the default player parameters for male and female"""
+        """Shows the default player settings for male and female"""
+        print('The following default settings are used: \n')
         if arg == 'female' or arg == 'male':
             print("gender: {} \n birth year: {} \n nationality: {}".format(arg,
                                                                            '1950',
                                                                            'any'))
         else:
-            print("Not a valid gender")
+            print("Not a valid gender.  Please input male or female")
 
     def complete_showdefaults(self, text, line, begidx, endidx):
         if not text:
@@ -62,7 +66,7 @@ class TennisPlayersShell(cmd.Cmd):
 
 
     def do_showsettings(self, arg):
-        """Shows the current player parameters"""
+        """Shows the current player settings"""
         print("gender: {} \n birth year: {} \n nationality: {}".format(self.players.gender,
                                                                        self.players.birthyear,
                                                                        self.players.nationality))
@@ -107,19 +111,51 @@ class TennisPlayersShell(cmd.Cmd):
 
     # -------- tennis stats commands ----------------
     def do_generatedataframe(self, arg):
+        """
+            Generate data frame based on the player settings.
+            To check which settings apply, use command showsettings
+        """
         if self.players.birthyear >= '1950':
             self.data = make_dataframe(self.players.link, self.players.gender, self.players.nationality, self.players.birthyear)
-            self.data.to_pickle('females.pkl')
+            #self.data.to_pickle('females.pkl')
 
     def do_displaydataframe(self, arg):
+        """
+            Display the current player dataframe
+        """
         print(self.data)
 
     def do_usedefaultframe(self, arg):
+        """
+            Use the pickled data frame obtained from the default player settings.
+            Wikipedia scrape from 19.10.2021
+        """
         self.do_showdefaults(arg)
         if arg == 'female':
             self.data = pandas.read_pickle('females.pkl')
         elif arg == 'male':
             self.data = pandas.read_pickle('males.pkl')
+
+    def do_max(self, arg):
+        """
+            Print maximum for
+             - career record
+             - TODO: wins at grand slams
+        """
+        if arg == 'career record':
+            maximum, id_max = analysis.max(self.data['career_record'])
+            print('maximum career record: {}% obtained by {}'.format(maximum, self.data['Name'][id_max]))
+
+        elif arg in 'Wimbledon':
+            print('maximum number of wins at Wimbledon:')
+        else:
+            print("Not a valid input.  Please input either career record or the name of a tournament")
+
+    def do_plot(self, arg):
+        if arg == 'career record, highest rankings':
+            analysis.plot_dataframe(self.data, 'career_record', 'highest_rankings')
+        if arg == 'gradient descent':
+            analysis.gradient_descent(self.data)
 
     # --------- basic commands ----------
     def do_exit(self, arg):
