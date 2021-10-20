@@ -5,11 +5,12 @@ from bs4 import BeautifulSoup
 
 
 def get_html(link):
-    # html = requests.get('https://en.wikipedia.org/wiki/List_of_male_singles_tennis_players')
+    """Requests wikipedia link"""
     return requests.get(link)
 
 
 def ok_to_scrape(link):
+    """Checks status code.  Returns True if result is 200, False otherwise"""
     html = get_html(link)
     if html.status_code == 200:
         return True
@@ -18,6 +19,7 @@ def ok_to_scrape(link):
 
 
 def make_player_table(link):
+    """If status code of link is 200, then generate soup from the player table"""
     html = get_html(link)
     if ok_to_scrape(link):
         soup = BeautifulSoup(html.text, 'html.parser')
@@ -29,6 +31,7 @@ def make_player_table(link):
 
 
 def get_wikilinks(player_table):
+    """Returns list of wikilinks for each player in the player table"""
     links = []
     for i in player_table.find_all(name='tr'):
         links.append(i.find('a', href=True))
@@ -42,10 +45,15 @@ def get_wikilinks(player_table):
     return new_links
 
 
+def birthyear_filter(data, birthyear):
+    filtered_data = data.drop(data[data.Birth < int(birthyear)].index)
+    return filtered_data
+
+
 def make_dataframe(link, gender, nat, birthyear):
     """ Constructs player dataframe.  Looks like this:
 
-        name | birthyear | wikilink | career record | highest ranking
+        Name | Birth | wikilink | career record | highest ranking
 
         career record = percentage of wins out of total number of games played
     """
@@ -74,15 +82,15 @@ def make_dataframe(link, gender, nat, birthyear):
     data['career_record'] = career_record
     data['highest_rankings'] = highest_rankings
 
-    # get rid of zeros
+    # get rid of zeros and very low rankings
     data = data[data.career_record != 0.0]
     data = data[data.highest_rankings != 0]
+    data = data[data.highest_rankings <= 150]
 
     return data
 
 
 def process_player_cards(data):
-
     """ Process player cards soup to get career prerecords and prerankings.
         The prefix "pre" is used because the data at this point looks like this:
             523–130 (80.1%) or 309–242
@@ -128,7 +136,6 @@ def process_player_cards(data):
 
 
 def get_record_and_ranking(data):
-
     """ Post-processing the output of the process_player_cards function.
         We want to keep (or compute) only the percentages for the records and the
         integer corresponding to the highest ranking for the rankings.

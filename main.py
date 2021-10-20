@@ -3,13 +3,17 @@ import readline
 import rlcompleter
 import pickle
 
-import pandas
+import pandas as pd
 import analysis
 
 from player import *
 from scrape import make_dataframe
 from tournaments import *
-from pandas import DataFrame
+from framemethods import *
+
+
+# TODO: make sure to get rid of place 400 person on females.  Add add_tournament function and updatedataframe.
+#  Improve plotting commands
 
 
 # ------- Making autocomplete work on Mac -------
@@ -44,9 +48,10 @@ class TennisPlayersShell(cmd.Cmd):
     nationality_list = [nat.name for nat in Nationality]
     gender_list = [g.name for g in Gender]
     tour_list = [t.name for t in Tour]
-    data = pandas.DataFrame()
+    data = pd.DataFrame()
 
-    # -------- player settings -------------
+    # -------- INITIAL PLAYER SETTINGS -------------
+    # To be used prior to scraping
     def do_showdefaults(self, arg):
         """Shows the default player settings for male and female"""
         print('The following default settings are used: \n')
@@ -109,7 +114,7 @@ class TennisPlayersShell(cmd.Cmd):
             completions = [nat for nat in self.nationality_list if nat.startswith(text)]
         return completions
 
-    # -------- tennis stats commands ----------------
+    # -------- TENNIS STATS COMMANDS ----------------
     def do_generatedataframe(self, arg):
         """
             Generate data frame based on the player settings.
@@ -117,7 +122,7 @@ class TennisPlayersShell(cmd.Cmd):
         """
         if self.players.birthyear >= '1950':
             self.data = make_dataframe(self.players.link, self.players.gender, self.players.nationality, self.players.birthyear)
-            #self.data.to_pickle('females.pkl')
+            # self.data.to_pickle('females.pkl')
 
     def do_displaydataframe(self, arg):
         """
@@ -132,9 +137,9 @@ class TennisPlayersShell(cmd.Cmd):
         """
         self.do_showdefaults(arg)
         if arg == 'female':
-            self.data = pandas.read_pickle('females.pkl')
+            self.data = pd.read_pickle('females.pkl')
         elif arg == 'male':
-            self.data = pandas.read_pickle('males.pkl')
+            self.data = pd.read_pickle('males.pkl')
 
     def do_max(self, arg):
         """
@@ -156,6 +161,12 @@ class TennisPlayersShell(cmd.Cmd):
             analysis.plot_dataframe(self.data, 'career_record', 'highest_rankings')
         if arg == 'gradient descent':
             analysis.gradient_descent(self.data)
+
+    # ----------- UPDATE DATAFRAME COMMANDS ---------
+    # To be used once scraping is complete to manipulate
+    # the dataframe
+    def do_ranking(self, arg):
+        self.data = highest_ranking(self.data, arg)
 
     # --------- basic commands ----------
     def do_exit(self, arg):

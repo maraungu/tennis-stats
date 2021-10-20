@@ -10,6 +10,9 @@ def plot_dataframe(data, x_axis, y_axis):
     x = data[x_axis]
     y = data[y_axis]
     plt.scatter(x, y)
+    plt.xlabel(x_axis)
+    plt.ylabel(y_axis)
+    plt.title('tennis-stats plot')
     plt.show()
 
 
@@ -44,7 +47,7 @@ def gradient_descent(data):
 
     Y_pred = k * np.exp(m * X + c)
 
-    for i in range(5):
+    for i in range(1000):
         Y_pred = k * np.exp(m * X + c)
         # print(Y_pred)
         # Y_pred = m * X + c # The current predicted value of Y
@@ -62,6 +65,9 @@ def gradient_descent(data):
     Y_pred = k * np.exp(m * X + c)
     plt.scatter(X, Y)
     plt.scatter(X, Y_pred, color='red')
+    plt.xlabel('Scaled career record')
+    plt.ylabel('Scaled highest ranking')
+    plt.title('Curve fitting with gradient descent')
     plt.show()
 
 
