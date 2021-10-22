@@ -1,26 +1,28 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+import framemethods
 from scrape import *
 from sklearn.preprocessing import MinMaxScaler
+from player import Nationality
 
 
 # TODO: Make this annotation stuff nicer
-def update_annot(ind, annot, sc, data, x_axis, y_axis):
+def update_annotations(ind, annotations, scatter_plot, data, x_axis, y_axis):
     """Updates the plot annotations for the point that the mouse is hovering on.
     The annotations will look like:
 
     player index player name (x_axis coordinate, y_axis coordinate)"""
 
     # Get point coordinate and add annotation
-    pos = sc.get_offsets()[ind["ind"][0]]
-    annot.xy = pos
+    pos = scatter_plot.get_offsets()[ind["ind"][0]]
+    annotations.xy = pos
     # Find the corresponding index in the dataframe
     idx = data.index[(data[x_axis] == pos[0]) & (data[y_axis] == pos[1])]
     # Add the annotation text
     text = "{} ({}, {})".format(data.Name[idx].to_string(), pos[0], pos[1])
-    annot.set_text(text)
-    annot.get_bbox_patch().set_alpha(0.4)
+    annotations.set_text(text)
+    annotations.get_bbox_patch().set_alpha(0.4)
 
 
 def plot_dataframe(data, x_axis, y_axis):
@@ -50,7 +52,7 @@ def plot_dataframe(data, x_axis, y_axis):
             cont, ind = scatter_plot.contains(event)
             # Update the annotations only when hovering over a data point
             if cont:
-                update_annot(ind, annotations, scatter_plot, data, x_axis, y_axis)
+                update_annotations(ind, annotations, scatter_plot, data, x_axis, y_axis)
                 annotations.set_visible(True)
                 fig.canvas.draw_idle()
             else:
@@ -63,14 +65,83 @@ def plot_dataframe(data, x_axis, y_axis):
     plt.show()
 
 
-def max(column):
+def tour_result(nat, data):
+    result_list = []
+    new_data = framemethods.nationality(data, nat)
+    print(len(new_data.index))
+
+    for result in Result:
+        print(result.name)
+        print(result.name[::-1])
+        result_data = new_data.drop(new_data[(new_data.wimbledon_results != result.name) & (new_data.us_results != result.name[::-1])].index)
+        result_list.append(len(result_data.index))
+    print(result_list)
+    return result_list
+
+
+def plot_tour_results_nationality(data):
+    """Using the matplotlib discrete distribution as horizontal bar chart template"""
+
+    tour_results = [r.name for r in Result]
+
+    country_results = {
+        'Germany': tour_result('Germany', data),
+        'France': tour_result('France', data),
+        'United States': tour_result('United States', data),
+        'Spain': tour_result('Spain', data),
+        'Great Britain': tour_result('Great Britain', data)
+    }
+
+    def survey(results, category_names):
+        """
+        Parameters
+        ----------
+        results : dict
+            A mapping from question labels to a list of answers per category.
+            It is assumed all lists contain the same number of entries and that
+            it matches the length of *category_names*.
+        category_names : list of str
+            The category labels.
+        """
+        labels = list(results.keys())
+        data = np.array(list(results.values()))
+        data_cum = data.cumsum(axis=1)
+        category_colors = plt.get_cmap('RdYlGn')(
+            np.linspace(0.15, 0.85, data.shape[1]))
+
+        fig, ax = plt.subplots(figsize=(9.2, 5))
+        ax.invert_yaxis()
+        ax.xaxis.set_visible(False)
+        ax.set_xlim(0, np.sum(data, axis=1).max())
+
+        for i, (colname, color) in enumerate(zip(category_names, category_colors)):
+            widths = data[:, i]
+            starts = data_cum[:, i] - widths
+            rects = ax.barh(labels, widths, left=starts, height=0.5,
+                            label=colname, color=color)
+
+            r, g, b, _ = color
+            text_color = 'white' if r * g * b < 0.5 else 'darkgrey'
+            ax.bar_label(rects, label_type='center', color=text_color)
+        ax.legend(ncol=len(category_names), bbox_to_anchor=(0, 1),
+                  loc='lower left', fontsize='small')
+
+        return fig, ax
+
+    survey(country_results, tour_results)
+    plt.show()
+
+
+def maximum(column):
     return column.max(), column.idxmax()
 
 
 def minmaxscale(data):
     """Scales the data in the career_record and highest_rankings columns"""
     data.astype({'highest_rankings': 'float64'}).dtypes
-    data_numbers = data.drop(["Name", "Birth", "wikilink"], axis=1)
+    data_numbers = data.drop(
+        ["Name", "Birth", "wikilink", "Nationality", "australian_results", "french_results", "wimbledon_results",
+         "us_results"], axis=1)
     arr = data_numbers.to_numpy()
     trans = MinMaxScaler()
     arr = trans.fit_transform(arr)
@@ -80,6 +151,7 @@ def minmaxscale(data):
 
 def gradient_descent(data):
     """Fit an exponential decay curve to the career_record/highest_rankings plot using gradient descent"""
+    # TODO: scale back
     data_scaled = minmaxscale(data)
 
     X = data_scaled['career_record']

@@ -11,8 +11,7 @@ from scrape import make_dataframe
 from tournaments import *
 
 
-#  Add add_tournament function and updatedataframe.
-#  Improve plotting commands
+#  Add add_tournament function
 
 
 # ------- Making autocomplete work on Mac -------
@@ -93,13 +92,14 @@ class TennisPlayersShell(cmd.Cmd):
 
     def do_birthyear(self, arg):
         """Choose earliest birth year of players: BIRTHYEAR 1958"""
-        if arg < '2010' and arg > '1920':
+        if '2010' > arg > '1920':
             self.players.birthyear = arg
         else:
             print('Not a valid earliest birthyear')
 
     def do_nationality(self, arg):
-        """Choose player nationality"""
+        """Choose player nationality
+        FIXME: fix this stuff"""
         if arg and arg in self.nationality_list:
             self.players.nationality = arg
         else:
@@ -121,7 +121,7 @@ class TennisPlayersShell(cmd.Cmd):
         if self.players.birthyear >= '1950':
             self.data = make_dataframe(self.players.link, self.players.gender, self.players.nationality,
                                        self.players.birthyear)
-            # self.data.to_pickle('females.pkl')
+            # self.data.to_pickle('males-complete.pkl')
 
     def do_displaydataframe(self, arg):
         """
@@ -132,13 +132,13 @@ class TennisPlayersShell(cmd.Cmd):
     def do_usedefaultframe(self, arg):
         """
             Use the pickled data frame obtained from the default player settings.
-            Wikipedia scrape from 19.10.2021
+            Wikipedia scrape from 22.10.2021
         """
         self.do_showdefaults(arg)
         if arg == 'female':
-            self.data = pd.read_pickle('females.pkl')
+            self.data = pd.read_pickle('females-complete.pkl')
         elif arg == 'male':
-            self.data = pd.read_pickle('males.pkl')
+            self.data = pd.read_pickle('males-complete.pkl')
 
     def do_max(self, arg):
         """
@@ -147,7 +147,7 @@ class TennisPlayersShell(cmd.Cmd):
              - TODO: wins at grand slams
         """
         if arg == 'career record':
-            maximum, id_max = analysis.max(self.data['career_record'])
+            maximum, id_max = analysis.maximum(self.data['career_record'])
             print('maximum career record: {}% obtained by {}'.format(maximum, self.data['Name'][id_max]))
 
         elif arg in 'Wimbledon':
@@ -184,12 +184,15 @@ class TennisPlayersShell(cmd.Cmd):
 
         return completions
 
+    def do_nationalresults(self, arg):
+        analysis.plot_tour_results_nationality(self.data)
+
     # ----------- UPDATE DATAFRAME COMMANDS ---------
     # To be used once scraping is complete to manipulate
     # the dataframe
     def do_filterranking(self, arg):
         """Filters out players with highest ranking > arg.
-        Example: FILTERRANK 150 outputs players with highest ranking at most 150"""
+        Example: FILTERRANKING 150 outputs players with highest ranking at most 150"""
         self.data = framemethods.highest_ranking(self.data, arg)
 
     def do_filterrecord(self, arg):
@@ -198,11 +201,32 @@ class TennisPlayersShell(cmd.Cmd):
         at least 60%"""
         self.data = framemethods.career_record(self.data, arg)
 
-    def do_filterbirthyear(self,arg):
+    def do_filterbirthyear(self, arg):
         """Filters out players with birthyears < arg.
-        Example: FILTERRECORD 1980 outputs players with year
+        Example: FILTERBIRTHYEAR 1980 outputs players with year
         of birth earlier than 1980
         """
+        if '2010' > arg > '1920':
+            self.data = framemethods.birthyear(self.data, arg)
+        else:
+            print('Not a valid earliest birthyear')
+
+    def do_filternationality(self, arg):
+        """Keeps players of specified nationality only.
+        Example: FILTERNATIONALITY France keeps only players
+        with nationality France"""
+
+        if arg and arg in self.nationality_list:
+            self.data = framemethods.nationality(self.data, arg)
+        else:
+            print('Not a valid nationality')
+
+    def complete_filternationality(self, text, line, begidx, endidx):
+        if not text:
+            completions = self.nationality_list
+        else:
+            completions = [nat for nat in self.nationality_list if nat.startswith(text)]
+        return completions
 
     # --------- BASIC COMMANDS ----------
     def do_exit(self, arg):
