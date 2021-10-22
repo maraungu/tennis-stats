@@ -1,18 +1,17 @@
 import cmd
 import readline
 import rlcompleter
-import pickle
 
 import pandas as pd
 import analysis
+import framemethods
 
 from player import *
 from scrape import make_dataframe
 from tournaments import *
-from framemethods import *
 
 
-# TODO: make sure to get rid of place 400 person on females.  Add add_tournament function and updatedataframe.
+#  Add add_tournament function and updatedataframe.
 #  Improve plotting commands
 
 
@@ -69,7 +68,6 @@ class TennisPlayersShell(cmd.Cmd):
             completions = [g for g in self.gender_list if g.startswith(text)]
         return completions
 
-
     def do_showsettings(self, arg):
         """Shows the current player settings"""
         print("gender: {} \n birth year: {} \n nationality: {}".format(self.players.gender,
@@ -121,7 +119,8 @@ class TennisPlayersShell(cmd.Cmd):
             To check which settings apply, use command showsettings
         """
         if self.players.birthyear >= '1950':
-            self.data = make_dataframe(self.players.link, self.players.gender, self.players.nationality, self.players.birthyear)
+            self.data = make_dataframe(self.players.link, self.players.gender, self.players.nationality,
+                                       self.players.birthyear)
             # self.data.to_pickle('females.pkl')
 
     def do_displaydataframe(self, arg):
@@ -157,18 +156,55 @@ class TennisPlayersShell(cmd.Cmd):
             print("Not a valid input.  Please input either career record or the name of a tournament")
 
     def do_plot(self, arg):
-        if arg == 'career record, highest rankings':
-            analysis.plot_dataframe(self.data, 'career_record', 'highest_rankings')
-        if arg == 'gradient descent':
+        """
+        Yields different plots for the dataframe.
+        Parameters are numerical columns of player dataframe.
+
+        Intended format: PLOT x-axis y-axis (optional: fitcurve).
+
+        Example: PLOT career_record highest_rankings fitcurve
+
+        FIXME: Only implemented gradient descent for x-axis = career_record and y-axis = highest ranking
+        """
+        arg_list = arg.rsplit()
+        print(arg_list, len(arg_list))
+        column_list = self.data.columns.tolist()
+        print(column_list)
+        if len(arg_list) == 2 and set(arg_list) <= set(column_list):
+            analysis.plot_dataframe(self.data, arg_list[0], arg_list[1])
+        elif len(arg_list) == 3 and arg_list[2] == 'fitcurve' and set(arg_list[:2]) <= set(column_list):
             analysis.gradient_descent(self.data)
+
+    def complete_plot(self, text, line, begidx, endidx):
+        column_list = self.data.columns.tolist()
+        if not text:
+            completions = column_list[3:]
+        else:
+            completions = [col for col in column_list[3:] if col.startswith(text)]
+
+        return completions
 
     # ----------- UPDATE DATAFRAME COMMANDS ---------
     # To be used once scraping is complete to manipulate
     # the dataframe
-    def do_ranking(self, arg):
-        self.data = highest_ranking(self.data, arg)
+    def do_filterranking(self, arg):
+        """Filters out players with highest ranking > arg.
+        Example: FILTERRANK 150 outputs players with highest ranking at most 150"""
+        self.data = framemethods.highest_ranking(self.data, arg)
 
-    # --------- basic commands ----------
+    def do_filterrecord(self, arg):
+        """Filters out players with career record < arg.
+        Example: FILTERRECORD 60 outputs players with career record of
+        at least 60%"""
+        self.data = framemethods.career_record(self.data, arg)
+
+    def do_filterbirthyear(self,arg):
+        """Filters out players with birthyears < arg.
+        Example: FILTERRECORD 1980 outputs players with year
+        of birth earlier than 1980
+        """
+
+    # --------- BASIC COMMANDS ----------
     def do_exit(self, arg):
         """Exit the shell"""
         print('Thank you for using tennis-stats')

@@ -7,6 +7,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 def plot_dataframe(data, x_axis, y_axis):
+    """Plots the dataframe with specified x axis and y axis"""
     x = data[x_axis]
     y = data[y_axis]
     plt.scatter(x, y)

@@ -216,7 +216,6 @@ def clean_dataframe(df, gender, nat):
         clean_data = clean_data.dropna()
         clean_data['Birth'] = clean_data['Birth'].astype(int)
     else:
-        print('Not a valid gender')
-        raise AttributeError
+        raise AttributeError('Not a valid gender')
 
     return clean_data
