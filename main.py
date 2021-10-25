@@ -11,7 +11,11 @@ from scrape import make_dataframe
 from tournaments import *
 
 
-#  Add add_tournament function
+""" TODO: 1. Add add_tournament function
+          2. Add retrieve one player function - done
+          3. Add tests
+          4. Add tour results for all tours and 'any' nationality
+"""
 
 
 # ------- Making autocomplete work on Mac -------
@@ -144,12 +148,12 @@ class TennisPlayersShell(cmd.Cmd):
         """
             Print maximum for
              - career record
-             - TODO: wins at grand slams
+             - TODO: wins at different tours
         """
         if arg == 'career record':
             maximum, id_max = analysis.maximum(self.data['career_record'])
             print('maximum career record: {}% obtained by {}'.format(maximum, self.data['Name'][id_max]))
-
+        # TODO: still wip
         elif arg in 'Wimbledon':
             print('maximum number of wins at Wimbledon:')
         else:
@@ -185,7 +189,18 @@ class TennisPlayersShell(cmd.Cmd):
         return completions
 
     def do_nationalresults(self, arg):
+        """Horizontal bar plot for each supported nationality
+        and supported tours.
+
+        Example: NATIONALRESULTS wimbledon outputs the
+        number of wins, finals, semis, etc. reached by players with
+        the supported nationality"""
         analysis.plot_tour_results_nationality(self.data)
+
+    def do_selectplayer(self, arg):
+        """Prints to terminal the information contained in the database
+        about player whose name contains arg"""
+        framemethods.select_player(self.data, arg)
 
     # ----------- UPDATE DATAFRAME COMMANDS ---------
     # To be used once scraping is complete to manipulate

@@ -73,24 +73,41 @@ def tour_result(nat, data):
     for result in Result:
         print(result.name)
         print(result.name[::-1])
-        result_data = new_data.drop(new_data[(new_data.wimbledon_results != result.name) & (new_data.us_results != result.name[::-1])].index)
+        result_data = new_data.drop(
+            new_data[(new_data.wimbledon_results != result.name) & (new_data.us_results != result.name[::-1])].index)
         result_list.append(len(result_data.index))
     print(result_list)
     return result_list
 
+
+def plot_tour_results(data):
+    """Using the matplotlib discrete distribution as horizontal bar chart template"""
+    tour_results = [r.name for r in Result]
 
 def plot_tour_results_nationality(data):
     """Using the matplotlib discrete distribution as horizontal bar chart template"""
 
     tour_results = [r.name for r in Result]
 
-    country_results = {
-        'Germany': tour_result('Germany', data),
-        'France': tour_result('France', data),
-        'United States': tour_result('United States', data),
-        'Spain': tour_result('Spain', data),
-        'Great Britain': tour_result('Great Britain', data)
-    }
+    nationality_list = [nat.name for nat in Nationality if nat.name != 'any']
+
+    # print(nationality_list)
+
+    country_results = [tour_result(nat.name, data) for nat in Nationality if nat.name != 'any']
+
+    # print(country_results)
+
+    country_results_dict = dict(zip(nationality_list, country_results))
+
+    # print(country_results_dict)
+
+    # country_results_dict = {
+    #     'Germany': tour_result('Germany', data),
+    #     'France': tour_result('France', data),
+    #     'United States': tour_result('United States', data),
+    #     'Spain': tour_result('Spain', data),
+    #     'Great Britain': tour_result('Great Britain', data)
+    # }
 
     def survey(results, category_names):
         """
@@ -128,7 +145,7 @@ def plot_tour_results_nationality(data):
 
         return fig, ax
 
-    survey(country_results, tour_results)
+    survey(country_results_dict, tour_results)
     plt.show()
 
 

@@ -12,6 +12,8 @@ class Nationality(Enum):
     France = 3
     Germany = 4
     Russia = 5
+    Spain = 6
+    UK = 7
 
 
 class Players:
