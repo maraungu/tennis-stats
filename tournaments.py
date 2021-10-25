@@ -2,10 +2,10 @@ from aenum import Enum
 
 
 class Tour(Enum):
-    australian = 1
-    french = 2
-    wimbledon = 3
-    usopen = 4
+    Australian = 1
+    French = 2
+    Wimbledon = 3
+    USopen = 4
 
 
 class Result(Enum):

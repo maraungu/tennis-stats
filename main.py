@@ -10,11 +10,12 @@ from player import *
 from scrape import make_dataframe
 from tournaments import *
 
-
-""" TODO: 1. Add add_tournament function
+""" TODO: 1. Add add_tournament function - done
           2. Add retrieve one player function - done
           3. Add tests
-          4. Add tour results for all tours and 'any' nationality
+          4. Add tour results for all tours and 'any' nationality - done
+          5. Make tour arg agree with tour enum - done
+          6. Improve documentation
 """
 
 
@@ -140,9 +141,11 @@ class TennisPlayersShell(cmd.Cmd):
         """
         self.do_showdefaults(arg)
         if arg == 'female':
-            self.data = pd.read_pickle('females-complete.pkl')
+            #self.data = pd.read_pickle('females-complete.pkl')
+            self.data = pd.read_pickle('females-final.pkl')
         elif arg == 'male':
-            self.data = pd.read_pickle('males-complete.pkl')
+            #self.data = pd.read_pickle('males-complete.pkl')
+            self.data = pd.read_pickle('males-final.pkl')
 
     def do_max(self, arg):
         """
@@ -169,13 +172,26 @@ class TennisPlayersShell(cmd.Cmd):
         Example: PLOT career_record highest_rankings fitcurve
 
         FIXME: Only implemented gradient descent for x-axis = career_record and y-axis = highest ranking
+
+        Horizontal bar plot for each supported nationality
+        and supported tours.
+
+        Example: NATIONALRESULTS wimbledon_results outputs the
+        number of wins, finals, semis, etc. reached by players with
+        the supported nationality
+
+        TODO: make arg agree with the tour enum
         """
         arg_list = arg.rsplit()
         print(arg_list, len(arg_list))
         column_list = self.data.columns.tolist()
         print(column_list)
-        if len(arg_list) == 2 and set(arg_list) <= set(column_list):
+        if len(arg_list) == 1 and arg_list[0] == 'tourresults':
+            analysis.plot_tour_results(self.data)
+        elif len(arg_list) == 2 and set(arg_list) <= set(column_list):
             analysis.plot_dataframe(self.data, arg_list[0], arg_list[1])
+        elif len(arg_list) == 2 and arg_list[0] == 'nationalresults':
+            analysis.plot_tour_results_nationality(self.data, arg_list[1])
         elif len(arg_list) == 3 and arg_list[2] == 'fitcurve' and set(arg_list[:2]) <= set(column_list):
             analysis.gradient_descent(self.data)
 
@@ -183,19 +199,11 @@ class TennisPlayersShell(cmd.Cmd):
         column_list = self.data.columns.tolist()
         if not text:
             completions = column_list[3:]
+            completions.extend(['nationalresults', 'tourresults'])
         else:
             completions = [col for col in column_list[3:] if col.startswith(text)]
 
         return completions
-
-    def do_nationalresults(self, arg):
-        """Horizontal bar plot for each supported nationality
-        and supported tours.
-
-        Example: NATIONALRESULTS wimbledon outputs the
-        number of wins, finals, semis, etc. reached by players with
-        the supported nationality"""
-        analysis.plot_tour_results_nationality(self.data)
 
     def do_selectplayer(self, arg):
         """Prints to terminal the information contained in the database

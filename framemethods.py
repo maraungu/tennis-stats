@@ -17,7 +17,10 @@ def nationality(data, nat):
             # new_data = data.drop(data[data.Nationality != 'Russia'].index)
             new_data = data.loc[data.Nationality.str.contains('Russia')]
         elif nat == 'UK':
-            new_data = data.drop(data[data.Nationality != 'Great Britain'].index)
+            new_data = data.drop(data[(data.Nationality != 'Great Britain') &
+                                      (data.Nationality != 'United Kingdom')].index)
+        elif nat == 'Germany':
+            new_data = data.loc[data.Nationality.str.contains('Germany')]
         elif nat == 'US':
             new_data = data.drop(data[data.Nationality != 'United States'].index)
         else:

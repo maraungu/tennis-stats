@@ -54,8 +54,7 @@ def birthyear_filter(data, birthyear):
 def make_dataframe(link, gender, nat, birthyear):
     """ Constructs player dataframe.  Looks like this:
 
-        Name | Birth | wikilink | career record | highest ranking | australian_results | french_results | wimbledon_results
-        | us_results
+    Name | Birth | wikilink | career record | highest ranking | Australian | French | Wimbledon | USopen
 
         career record = percentage of wins out of total number of games played
     """
@@ -81,14 +80,15 @@ def make_dataframe(link, gender, nat, birthyear):
     # ----- add new columns to be filled with career record and highest rankings ----
     data = data.assign(career_record="", highest_rankings="")
 
-    career_record, highest_rankings, australian_results, french_results, wimbledon_results, us_results = get_record_ranking_tours(data)
-
+    career_record, highest_rankings, australian_results, french_results, wimbledon_results, us_results = \
+        get_record_ranking_tours(data)
+    # TODO: have to scrape again to rename the tour columns to coincide with the enum names
     data['career_record'] = career_record
     data['highest_rankings'] = highest_rankings
-    data['australian_results'] = australian_results
-    data['french_results'] = french_results
-    data['wimbledon_results'] = wimbledon_results
-    data['us_results'] = us_results
+    data['Australian'] = australian_results
+    data['French'] = french_results
+    data['Wimbledon'] = wimbledon_results
+    data['USopen'] = us_results
 
     # get rid of zeros and very low rankings
     data = data[data.career_record != 0.0]

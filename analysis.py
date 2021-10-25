@@ -65,7 +65,7 @@ def plot_dataframe(data, x_axis, y_axis):
     plt.show()
 
 
-def tour_result(nat, data):
+def tour_result(nat, data, tour):
     result_list = []
     new_data = framemethods.nationality(data, nat)
     print(len(new_data.index))
@@ -74,7 +74,7 @@ def tour_result(nat, data):
         print(result.name)
         print(result.name[::-1])
         result_data = new_data.drop(
-            new_data[(new_data.wimbledon_results != result.name) & (new_data.us_results != result.name[::-1])].index)
+            new_data[(new_data[tour] != result.name) & (new_data[tour] != result.name[::-1])].index)
         result_list.append(len(result_data.index))
     print(result_list)
     return result_list
@@ -84,69 +84,67 @@ def plot_tour_results(data):
     """Using the matplotlib discrete distribution as horizontal bar chart template"""
     tour_results = [r.name for r in Result]
 
-def plot_tour_results_nationality(data):
+    tours = [t.name for t in Tour]
+
+    tours_result_list = [tour_result('any', data, tour_name) for tour_name in tours]
+
+    tours_dict = dict(zip(tours, tours_result_list))
+
+    bar_graph(tours_dict, tour_results)
+    plt.show()
+
+
+def plot_tour_results_nationality(data, tour):
     """Using the matplotlib discrete distribution as horizontal bar chart template"""
 
     tour_results = [r.name for r in Result]
 
     nationality_list = [nat.name for nat in Nationality if nat.name != 'any']
 
-    # print(nationality_list)
-
-    country_results = [tour_result(nat.name, data) for nat in Nationality if nat.name != 'any']
-
-    # print(country_results)
+    country_results = [tour_result(nat.name, data, tour) for nat in Nationality if nat.name != 'any']
 
     country_results_dict = dict(zip(nationality_list, country_results))
 
-    # print(country_results_dict)
-
-    # country_results_dict = {
-    #     'Germany': tour_result('Germany', data),
-    #     'France': tour_result('France', data),
-    #     'United States': tour_result('United States', data),
-    #     'Spain': tour_result('Spain', data),
-    #     'Great Britain': tour_result('Great Britain', data)
-    # }
-
-    def survey(results, category_names):
-        """
-        Parameters
-        ----------
-        results : dict
-            A mapping from question labels to a list of answers per category.
-            It is assumed all lists contain the same number of entries and that
-            it matches the length of *category_names*.
-        category_names : list of str
-            The category labels.
-        """
-        labels = list(results.keys())
-        data = np.array(list(results.values()))
-        data_cum = data.cumsum(axis=1)
-        category_colors = plt.get_cmap('RdYlGn')(
-            np.linspace(0.15, 0.85, data.shape[1]))
-
-        fig, ax = plt.subplots(figsize=(9.2, 5))
-        ax.invert_yaxis()
-        ax.xaxis.set_visible(False)
-        ax.set_xlim(0, np.sum(data, axis=1).max())
-
-        for i, (colname, color) in enumerate(zip(category_names, category_colors)):
-            widths = data[:, i]
-            starts = data_cum[:, i] - widths
-            rects = ax.barh(labels, widths, left=starts, height=0.5,
-                            label=colname, color=color)
-
-            r, g, b, _ = color
-            text_color = 'white' if r * g * b < 0.5 else 'darkgrey'
-            ax.bar_label(rects, label_type='center', color=text_color)
-        ax.legend(ncol=len(category_names), bbox_to_anchor=(0, 1),
-                  loc='lower left', fontsize='small')
-
-        return fig, ax
-
-    survey(country_results_dict, tour_results)
+    bar_graph(country_results_dict, tour_results)
     plt.show()
+
+
+def bar_graph(results, category_names):
+    """
+    Parameters
+    ----------
+    results : dict
+        A mapping from labels (nationality, tour name, etc) to a list of results per category.
+        It is assumed all lists contain the same number of entries and that
+        it matches the length of *category_names*.
+    category_names : list of str
+        The category labels.
+    """
+    labels = list(results.keys())
+    data = np.array(list(results.values()))
+    data_cum = data.cumsum(axis=1)
+    category_colors = plt.get_cmap('RdYlGn')(
+        np.linspace(0.15, 0.85, data.shape[1]))
+
+    fig, ax = plt.subplots(figsize=(9.2, 5))
+    ax.invert_yaxis()
+    ax.xaxis.set_visible(False)
+    ax.set_xlim(0, np.sum(data, axis=1).max())
+
+    for i, (colname, color) in enumerate(zip(category_names, category_colors)):
+        widths = data[:, i]
+        starts = data_cum[:, i] - widths
+        rects = ax.barh(labels, widths, left=starts, height=0.5,
+                        label=colname, color=color)
+
+        r, g, b, _ = color
+        text_color = 'white' if r * g * b < 0.5 else 'darkgrey'
+        print(data[:, i])
+        ax.bar_label(rects, label_type='center', color=text_color)
+    ax.legend(ncol=len(category_names), bbox_to_anchor=(0, 1),
+              loc='lower left', fontsize='small')
+
+    return fig, ax
 
 
 def maximum(column):
