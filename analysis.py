@@ -5,6 +5,8 @@ import framemethods
 from scrape import *
 from sklearn.preprocessing import MinMaxScaler
 from player import Nationality
+from tournaments import Result, Tour
+from matplotlib.patches import Rectangle
 
 
 # TODO: Make this annotation stuff nicer
@@ -27,7 +29,8 @@ def update_annotations(ind, annotations, scatter_plot, data, x_axis, y_axis):
 
 def plot_dataframe(data, x_axis, y_axis):
     """Plots the dataframe with specified x-axis and y-axis.
-    Possible axes are the numerical columns of the player dataframe."""
+    Possible axes are the numerical columns of the player dataframe.
+    Hovering over point displays name of player and their dataframe index"""
 
     # Make the plot
     x = data[x_axis]
@@ -65,51 +68,73 @@ def plot_dataframe(data, x_axis, y_axis):
     plt.show()
 
 
-def tour_result(nat, data, tour):
+def tour_result(data, nat, tour):
+    """
+    :param data: dataframe
+    :param nat: Nationality.name
+    :param tour: Tour.name
+    :return: List of numbers of distinct players of given Nationality to achieve each Result in the Tour
+    """
     result_list = []
     new_data = framemethods.nationality(data, nat)
-    print(len(new_data.index))
 
     for result in Result:
-        print(result.name)
-        print(result.name[::-1])
         result_data = new_data.drop(
             new_data[(new_data[tour] != result.name) & (new_data[tour] != result.name[::-1])].index)
         result_list.append(len(result_data.index))
-    print(result_list)
+
     return result_list
 
 
 def plot_tour_results(data):
-    """Using the matplotlib discrete distribution as horizontal bar chart template"""
-    tour_results = [r.name for r in Result]
+    """
+    :param data: dataframe
+
+    Using the matplotlib discrete distribution as horizontal bar chart template
+
+    y-axis: Supported tours as in the Tour enum
+
+    x-axis: Number of distinct players to achieve each result in each tour as given by the
+            Result enum"""
+    possible_tour_results = [r.name for r in Result]
 
     tours = [t.name for t in Tour]
 
-    tours_result_list = [tour_result('any', data, tour_name) for tour_name in tours]
+    tours_result_list = [tour_result(data, 'any', tour_name) for tour_name in tours]
 
     tours_dict = dict(zip(tours, tours_result_list))
 
-    bar_graph(tours_dict, tour_results)
+    plot_title = 'Tournament results'
+    bar_graph(tours_dict, possible_tour_results, plot_title)
     plt.show()
 
 
 def plot_tour_results_nationality(data, tour):
-    """Using the matplotlib discrete distribution as horizontal bar chart template"""
+    """
+    :param data: dataframe
+    :param tour: Tour.name
 
-    tour_results = [r.name for r in Result]
+    Using the matplotlib discrete distribution as horizontal bar chart template
+
+    y-axis: Supported nationalities
+
+    x-axis: Number of distinct players to achieve each result as given by the Result enum"""
+
+    possible_tour_results = [r.name for r in Result]
 
     nationality_list = [nat.name for nat in Nationality if nat.name != 'any']
 
-    country_results = [tour_result(nat.name, data, tour) for nat in Nationality if nat.name != 'any']
+    country_results = [tour_result(data, nat.name, tour) for nat in Nationality if nat.name != 'any']
 
     country_results_dict = dict(zip(nationality_list, country_results))
 
-    bar_graph(country_results_dict, tour_results)
+    plot_title = tour + ' results'
+
+    bar_graph(country_results_dict, possible_tour_results, plot_title)
     plt.show()
 
 
-def bar_graph(results, category_names):
+def bar_graph(results, category_names, plot_title):
     """
     Parameters
     ----------
@@ -119,10 +144,14 @@ def bar_graph(results, category_names):
         it matches the length of *category_names*.
     category_names : list of str
         The category labels.
+    plot_title: str
+        Title of the resulting plot
     """
     labels = list(results.keys())
+
     data = np.array(list(results.values()))
     data_cum = data.cumsum(axis=1)
+
     category_colors = plt.get_cmap('RdYlGn')(
         np.linspace(0.15, 0.85, data.shape[1]))
 
@@ -130,24 +159,33 @@ def bar_graph(results, category_names):
     ax.invert_yaxis()
     ax.xaxis.set_visible(False)
     ax.set_xlim(0, np.sum(data, axis=1).max())
+    ax.set_title(plot_title)
 
     for i, (colname, color) in enumerate(zip(category_names, category_colors)):
         widths = data[:, i]
         starts = data_cum[:, i] - widths
-        rects = ax.barh(labels, widths, left=starts, height=0.5,
-                        label=colname, color=color)
 
-        r, g, b, _ = color
-        text_color = 'white' if r * g * b < 0.5 else 'darkgrey'
-        print(data[:, i])
-        ax.bar_label(rects, label_type='center', color=text_color)
-    ax.legend(ncol=len(category_names), bbox_to_anchor=(0, 1),
-              loc='lower left', fontsize='small')
+        ax.barh(labels, widths, left=starts, height=0.5,
+                label=colname, color=color)
+
+    # Adding the number of players for each result and hiding the zero values
+    for p in ax.get_children()[:-1]:  # skip the last patch as it is the background
+        if isinstance(p, Rectangle):
+            x, y = p.get_xy()
+            w, h = p.get_width(), p.get_height()
+            r, g, b, _ = p.get_facecolor()
+            text_color = 'white' if r * g * b < 0.5 else 'darkgrey'
+            if w > 0:  # anything that has a width of 0 will not be annotated
+                ax.text(x + 0.5 * w, y + 0.5 * h, '%i' % w, va='center', ha='center', color=text_color)
+
+    ax.legend(ncol=len(category_names), bbox_to_anchor=(0, 0),
+              loc='upper left', fontsize='small')
 
     return fig, ax
 
 
 def maximum(column):
+    """Yields maximum value in dataframe column and its index"""
     return column.max(), column.idxmax()
 
 
@@ -155,8 +193,8 @@ def minmaxscale(data):
     """Scales the data in the career_record and highest_rankings columns"""
     data.astype({'highest_rankings': 'float64'}).dtypes
     data_numbers = data.drop(
-        ["Name", "Birth", "wikilink", "Nationality", "australian_results", "french_results", "wimbledon_results",
-         "us_results"], axis=1)
+        ["Name", "Birth", "wikilink", "Nationality", "Australian", "French", "Wimbledon",
+         "USopen"], axis=1)
     arr = data_numbers.to_numpy()
     trans = MinMaxScaler()
     arr = trans.fit_transform(arr)

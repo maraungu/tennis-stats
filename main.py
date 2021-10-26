@@ -12,10 +12,10 @@ from tournaments import *
 
 """ TODO: 1. Add add_tournament function - done
           2. Add retrieve one player function - done
-          3. Add tests
+          3. TODO: Add tests
           4. Add tour results for all tours and 'any' nationality - done
           5. Make tour arg agree with tour enum - done
-          6. Improve documentation
+          6. Improve documentation - done
 """
 
 
@@ -89,6 +89,7 @@ class TennisPlayersShell(cmd.Cmd):
                 self.players.link = 'https://en.wikipedia.org/wiki/List_of_male_singles_tennis_players'
 
     def complete_playergender(self, text, line, begidx, endidx):
+        """Autocompleter for playergender command"""
         if not text:
             completions = self.gender_list
         else:
@@ -103,14 +104,14 @@ class TennisPlayersShell(cmd.Cmd):
             print('Not a valid earliest birthyear')
 
     def do_nationality(self, arg):
-        """Choose player nationality
-        FIXME: fix this stuff"""
+        """Choose player nationality"""
         if arg and arg in self.nationality_list:
             self.players.nationality = arg
         else:
             print('Not a valid nationality')
 
     def complete_nationality(self, text, line, begidx, endidx):
+        """Adds autocomplete for supported nationalities"""
         if not text:
             completions = self.nationality_list
         else:
@@ -151,12 +152,12 @@ class TennisPlayersShell(cmd.Cmd):
         """
             Print maximum for
              - career record
-             - TODO: wins at different tours
+             - TODO: potentially wins at different tours - need to upgrade the scraping
         """
         if arg == 'career record':
             maximum, id_max = analysis.maximum(self.data['career_record'])
             print('maximum career record: {}% obtained by {}'.format(maximum, self.data['Name'][id_max]))
-        # TODO: still wip
+        # TODO: potential wip
         elif arg in 'Wimbledon':
             print('maximum number of wins at Wimbledon:')
         else:
@@ -176,16 +177,16 @@ class TennisPlayersShell(cmd.Cmd):
         Horizontal bar plot for each supported nationality
         and supported tours.
 
-        Example: NATIONALRESULTS wimbledon_results outputs the
+        For supported nationalities, see Nationality enum.  For supported tours, see Tour enum
+
+        Example: NATIONALRESULTS Wimbledon outputs the
         number of wins, finals, semis, etc. reached by players with
         the supported nationality
-
-        TODO: make arg agree with the tour enum
         """
         arg_list = arg.rsplit()
-        print(arg_list, len(arg_list))
+        # print(arg_list, len(arg_list))
         column_list = self.data.columns.tolist()
-        print(column_list)
+        # print(column_list)
         if len(arg_list) == 1 and arg_list[0] == 'tourresults':
             analysis.plot_tour_results(self.data)
         elif len(arg_list) == 2 and set(arg_list) <= set(column_list):
@@ -196,9 +197,10 @@ class TennisPlayersShell(cmd.Cmd):
             analysis.gradient_descent(self.data)
 
     def complete_plot(self, text, line, begidx, endidx):
+        """Autocomplete for plot command"""
         column_list = self.data.columns.tolist()
         if not text:
-            completions = column_list[3:]
+            completions = column_list[4:]
             completions.extend(['nationalresults', 'tourresults'])
         else:
             completions = [col for col in column_list[3:] if col.startswith(text)]
@@ -245,6 +247,7 @@ class TennisPlayersShell(cmd.Cmd):
             print('Not a valid nationality')
 
     def complete_filternationality(self, text, line, begidx, endidx):
+        """Autocompleter for supported nationalities"""
         if not text:
             completions = self.nationality_list
         else:

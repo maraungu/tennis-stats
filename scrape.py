@@ -2,7 +2,6 @@ import re
 import requests
 import pandas
 from bs4 import BeautifulSoup
-from tournaments import *
 
 
 def get_html(link):
@@ -46,11 +45,6 @@ def get_wikilinks(player_table):
     return new_links
 
 
-def birthyear_filter(data, birthyear):
-    filtered_data = data.drop(data[data.Birth < int(birthyear)].index)
-    return filtered_data
-
-
 def make_dataframe(link, gender, nat, birthyear):
     """ Constructs player dataframe.  Looks like this:
 
@@ -82,7 +76,7 @@ def make_dataframe(link, gender, nat, birthyear):
 
     career_record, highest_rankings, australian_results, french_results, wimbledon_results, us_results = \
         get_record_ranking_tours(data)
-    # TODO: have to scrape again to rename the tour columns to coincide with the enum names
+
     data['career_record'] = career_record
     data['highest_rankings'] = highest_rankings
     data['Australian'] = australian_results
@@ -187,7 +181,8 @@ def get_record_ranking_tours(data):
             The entry: 523–130 (80.1%) -> 80.1%
             The entry: 309–242 -> 56.1%
             The entry: No. 8 (February 9, 2004) -> 8
-        The output is a list of career records and a list of highest rankings
+            The entry: W (2001, 2003) -> W
+        The output is a list of career records, highest rankings, and tournament results for each supported tour
     """
 
     pre_records, pre_rankings, pre_australian, pre_french, pre_wimbledon, pre_us = process_player_cards(data)
@@ -208,6 +203,13 @@ def get_record_ranking_tours(data):
 
 
 def get_tournament_results(pre_results):
+    """Post-processing tournamanet pre_results.  Example:
+
+        The entry: W (2001, 2003) -> W
+
+        :param pre_results: list of str
+        :return: list of str
+    """
     tournament_results = []
     for result in pre_results:
         if result != "not there" and result != '':
@@ -219,6 +221,14 @@ def get_tournament_results(pre_results):
 
 
 def get_records(pre_records):
+    """Post-processing pre_records.  Example:
+
+        The entry: 523–130 (80.1%) -> 80.1%
+        The entry: 309–242 -> 56.1%
+
+        :param pre_records: list of str
+        :return: list of float
+    """
     career_record = []
     for record in pre_records:
         if record != 'not there' and record != 'no value' and record != 'unknown value' and record != '':
@@ -240,6 +250,14 @@ def get_records(pre_records):
 
 
 def get_rankings(pre_rankings):
+    """
+    Post-processing pre_rankings.  Example:
+
+    The entry: No. 8 (February 9, 2004) -> 8
+
+    :param pre_rankings: list of str
+    :return: list of int
+    """
     highest_rankings = []
     for ranking in pre_rankings:
         if ranking != 'not there' and ranking != 'no value' and ranking != 'unknown value' and ranking != '':
@@ -253,6 +271,10 @@ def get_rankings(pre_rankings):
 
 
 def get_player_cards(data):
+    """
+    :param data: dataframe
+    :return: List of player cards, i.e. the infoboxes on the top-right corner of the wiki page for each player.
+    """
     player_cards = []
 
     for index, row in data.iterrows():
