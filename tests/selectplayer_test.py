@@ -3,6 +3,7 @@ import pandas as pd
 
 from tennis_stats import framemethods
 
+
 # To run: in root folder (tennis) python -m unittest tests.selectplayer_test
 # Test results based on dataframe pickled from wikipedia scrape on 22.10.2021
 class TestSelectPlayer(unittest.TestCase):

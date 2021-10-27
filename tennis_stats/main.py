@@ -10,14 +10,6 @@ from player import *
 from scrape import make_dataframe
 from tournaments import *
 
-""" TODO: 1. Add add_tournament function - done
-          2. Add retrieve one player function - done
-          3. TODO: Add tests
-          4. Add tour results for all tours and 'any' nationality - done
-          5. Make tour arg agree with tour enum - done
-          6. Improve documentation - done
-"""
-
 
 # ------- Making autocomplete work on Mac -------
 class TabCompleter(rlcompleter.Completer):

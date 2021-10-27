@@ -1,10 +1,11 @@
-# Collection of dataframe methods data are
+# Collection of dataframe methods data which are
 # wrapped up as commands in the CLI
 
 
 def maximum(column):
     """Yields maximum value in dataframe column and its index"""
     return column.max(), column.idxmax()
+
 
 def birthyear(data, year):
     """
