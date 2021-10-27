@@ -39,7 +39,7 @@ def plot_dataframe(data, x_axis, y_axis):
     scatter_plot = plt.scatter(x, y)
     plt.xlabel(x_axis)
     plt.ylabel(y_axis)
-    plt.title('tennis-stats plot')
+    plt.title('tennis_stats plot')
 
     # Annotate the scatter plot
     annotations = ax.annotate("", xy=(0, 0), xytext=(20, 20), textcoords="offset points",
@@ -182,11 +182,6 @@ def bar_graph(results, category_names, plot_title):
               loc='upper left', fontsize='small')
 
     return fig, ax
-
-
-def maximum(column):
-    """Yields maximum value in dataframe column and its index"""
-    return column.max(), column.idxmax()
 
 
 def minmaxscale(data):

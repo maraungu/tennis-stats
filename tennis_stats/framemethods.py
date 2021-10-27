@@ -2,6 +2,10 @@
 # wrapped up as commands in the CLI
 
 
+def maximum(column):
+    """Yields maximum value in dataframe column and its index"""
+    return column.max(), column.idxmax()
+
 def birthyear(data, year):
     """
     Filters out birthyears lower than input
@@ -70,5 +74,7 @@ def select_player(data, name):
         idx = new_data.loc[new_data.Name.str.contains(name)]
         if not idx.empty:
             print(idx)
+            return idx
         else:
             print("The player {} does not appear in the database.".format(name))
+            return idx

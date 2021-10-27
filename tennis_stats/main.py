@@ -44,7 +44,7 @@ else:
 class TennisPlayersShell(cmd.Cmd):
     """This is a simple shell for interactive tennis stats"""
     intro = 'Welcome to the tennis stats shell.  Type help or ? to list commands. \n'
-    prompt = '(tennis-stats)'
+    prompt = '(tennis_stats)'
     file = None
 
     players = Players()
@@ -127,7 +127,8 @@ class TennisPlayersShell(cmd.Cmd):
         if self.players.birthyear >= '1950':
             self.data = make_dataframe(self.players.link, self.players.gender, self.players.nationality,
                                        self.players.birthyear)
-            # self.data.to_pickle('males-complete.pkl')
+            # If you want to pickle the generated dataframe:
+            # self.data.to_pickle('pickled-dataframes/gender-new.pkl')
 
     def do_displaydataframe(self, arg):
         """
@@ -142,11 +143,9 @@ class TennisPlayersShell(cmd.Cmd):
         """
         self.do_showdefaults(arg)
         if arg == 'female':
-            #self.data = pd.read_pickle('females-complete.pkl')
-            self.data = pd.read_pickle('females-final.pkl')
+            self.data = pd.read_pickle('pickled-dataframes/females-final.pkl')
         elif arg == 'male':
-            #self.data = pd.read_pickle('males-complete.pkl')
-            self.data = pd.read_pickle('males-final.pkl')
+            self.data = pd.read_pickle('pickled-dataframes/males-final.pkl')
 
     def do_max(self, arg):
         """
@@ -155,7 +154,7 @@ class TennisPlayersShell(cmd.Cmd):
              - TODO: potentially wins at different tours - need to upgrade the scraping
         """
         if arg == 'career record':
-            maximum, id_max = analysis.maximum(self.data['career_record'])
+            maximum, id_max = framemethods.maximum(self.data['career_record'])
             print('maximum career record: {}% obtained by {}'.format(maximum, self.data['Name'][id_max]))
         # TODO: potential wip
         elif arg in 'Wimbledon':
@@ -257,10 +256,9 @@ class TennisPlayersShell(cmd.Cmd):
     # --------- BASIC COMMANDS ----------
     def do_exit(self, arg):
         """Exit the shell"""
-        print('Thank you for using tennis-stats')
+        print('Thank you for using tennis_stats')
         raise SystemExit()
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     TennisPlayersShell().cmdloop()
