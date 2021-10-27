@@ -1,4 +1,4 @@
-# Collection of dataframe methods data which are
+# Collection of dataframe methods which are
 # wrapped up as commands in the CLI
 
 
