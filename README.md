@@ -111,16 +111,16 @@ for the dataframe wrapped as CLI commands in `main.py`.  Examples of use
 on the female player default dataframe:
  - `plot career_record highest_rankings`
    
-![](photo1.png)
+![](readmephotos/photo1.png)
 
 The annotations for each point consist of: idx of player in
 dataframe, Name, career record and highest ranking
  - `plot career_record highest_rankings fitcurve`
    
-![](photo2.png)
+![](readmephotos/photo2.png)
  - `plot nationalresults Tour`
 
-![](photo3.png)
+![](readmephotos/photo3.png)
  - `plot tourresults`
 
-![](photo4.png)
+![](readmephotos/photo4.png)
