@@ -110,7 +110,7 @@ class TennisPlayersShell(cmd.Cmd):
             completions = [nat for nat in self.nationality_list if nat.startswith(text)]
         return completions
 
-    # -------- TENNIS STATS COMMANDS ----------------
+    # -------- OBTAIN DATAFRAME ----------------
     def do_generatedataframe(self, arg):
         """
             Generate data frame based on the player settings.
@@ -122,12 +122,6 @@ class TennisPlayersShell(cmd.Cmd):
             # If you want to pickle the generated dataframe:
             # self.data.to_pickle('pickled-dataframes/gender-new.pkl')
 
-    def do_displaydataframe(self, arg):
-        """
-            Display the current player dataframe
-        """
-        print(self.data)
-
     def do_usedefaultframe(self, arg):
         """
             Use the pickled data frame obtained from the default player settings.
@@ -138,6 +132,59 @@ class TennisPlayersShell(cmd.Cmd):
             self.data = pd.read_pickle('pickled-dataframes/females-final.pkl')
         elif arg == 'male':
             self.data = pd.read_pickle('pickled-dataframes/males-final.pkl')
+
+    def do_displaydataframe(self, arg):
+        """
+            Display the current player dataframe
+        """
+        print(self.data)
+
+    # ----------- WRAPPED DATAFRAME METHODS ---------
+    # To be used once scraping is complete to manipulate
+    # the dataframe
+    def do_filterranking(self, arg):
+        """Filters out players with highest ranking > arg.
+        Example: FILTERRANKING 150 outputs players with highest ranking at most 150"""
+        self.data = framemethods.highest_ranking(self.data, arg)
+
+    def do_filterrecord(self, arg):
+        """Filters out players with career record < arg.
+        Example: FILTERRECORD 60 outputs players with career record of
+        at least 60%"""
+        self.data = framemethods.career_record(self.data, arg)
+
+    def do_filterbirthyear(self, arg):
+        """Filters out players with birthyears < arg.
+        Example: FILTERBIRTHYEAR 1980 outputs players with year
+        of birth earlier than 1980
+        """
+        if '2010' > arg > '1920':
+            self.data = framemethods.birthyear(self.data, arg)
+        else:
+            print('Not a valid earliest birthyear')
+
+    def do_filternationality(self, arg):
+        """Keeps players of specified nationality only.
+        Example: FILTERNATIONALITY France keeps only players
+        with nationality France"""
+
+        if arg and arg in self.nationality_list:
+            self.data = framemethods.nationality(self.data, arg)
+        else:
+            print('Not a valid nationality')
+
+    def complete_filternationality(self, text, line, begidx, endidx):
+        """Autocompleter for supported nationalities"""
+        if not text:
+            completions = self.nationality_list
+        else:
+            completions = [nat for nat in self.nationality_list if nat.startswith(text)]
+        return completions
+
+    def do_selectplayer(self, arg):
+        """Prints to terminal the information contained in the database
+        about player whose name contains arg"""
+        framemethods.select_player(self.data, arg)
 
     def do_max(self, arg):
         """
@@ -153,6 +200,8 @@ class TennisPlayersShell(cmd.Cmd):
             print('maximum number of wins at Wimbledon:')
         else:
             print("Not a valid input.  Please input either career record or the name of a tournament")
+
+    # ------- DATA ANALYSIS COMMANDS -----
 
     def do_plot(self, arg):
         """
@@ -196,53 +245,6 @@ class TennisPlayersShell(cmd.Cmd):
         else:
             completions = [col for col in column_list[3:] if col.startswith(text)]
 
-        return completions
-
-    def do_selectplayer(self, arg):
-        """Prints to terminal the information contained in the database
-        about player whose name contains arg"""
-        framemethods.select_player(self.data, arg)
-
-    # ----------- UPDATE DATAFRAME COMMANDS ---------
-    # To be used once scraping is complete to manipulate
-    # the dataframe
-    def do_filterranking(self, arg):
-        """Filters out players with highest ranking > arg.
-        Example: FILTERRANKING 150 outputs players with highest ranking at most 150"""
-        self.data = framemethods.highest_ranking(self.data, arg)
-
-    def do_filterrecord(self, arg):
-        """Filters out players with career record < arg.
-        Example: FILTERRECORD 60 outputs players with career record of
-        at least 60%"""
-        self.data = framemethods.career_record(self.data, arg)
-
-    def do_filterbirthyear(self, arg):
-        """Filters out players with birthyears < arg.
-        Example: FILTERBIRTHYEAR 1980 outputs players with year
-        of birth earlier than 1980
-        """
-        if '2010' > arg > '1920':
-            self.data = framemethods.birthyear(self.data, arg)
-        else:
-            print('Not a valid earliest birthyear')
-
-    def do_filternationality(self, arg):
-        """Keeps players of specified nationality only.
-        Example: FILTERNATIONALITY France keeps only players
-        with nationality France"""
-
-        if arg and arg in self.nationality_list:
-            self.data = framemethods.nationality(self.data, arg)
-        else:
-            print('Not a valid nationality')
-
-    def complete_filternationality(self, text, line, begidx, endidx):
-        """Autocompleter for supported nationalities"""
-        if not text:
-            completions = self.nationality_list
-        else:
-            completions = [nat for nat in self.nationality_list if nat.startswith(text)]
         return completions
 
     # --------- BASIC COMMANDS ----------
