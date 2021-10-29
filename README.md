@@ -1,16 +1,41 @@
 # Welcome to tennis_stats!
 
-This is a collection of CLI tools to scrape and analyse tennis players 
+This is a collection of interactove CLI tools to scrape and analyse tennis players 
 player statistics as can be found on wikipedia.
 
-## Intro
+## Intro and Setup
+
+To setup the CLI create a Python virtual environment using the
+`requirements.txt` file.  The script is run by typing
+
+`(prompt) python main.py`
+
+inside the `tennis_stats` folder.  The commands of the
+interactive CLI are wrapped function whose definitions is to 
+be found in the files `scrape.py`, `framemethods.py`, and `analysis.py`
+in the `tennis_stats` directory.
+
+Once the script is running one may type
+
+`(tennis_stats) help`
+
+to print the list of all commands to terminal or
+
+`(tennis_stats) help command` 
+
+to print the documentation for a command to terminal.
+
+The folder `tests` contains some unit tests for the most basic
+expectations of what the script should do once the dataframe
+is created, but is currently not a full test suite.
+
 
 There are two main use-cases for the CLI:
 
 1. Scrape wikipedia using the command `generatedataframe` to generate a new dataframe and perform
 data analysis.
 
-2. Use a ready-made dataframe scraped from wikipedia on 22.10.2021
+2. Use a ready-made dataframe scraped from wikipedia on **22.10.2021**
 and perform data analysis.  The ready-made dataframe was scraped
    using the same `generatedataframe` command from our CLI.
    
@@ -33,7 +58,8 @@ be male or female
 to 1950.  
    
  - `nationality xyz` where xyz is one of the supported 
-nationalities defined in the Nationality enum.  
+nationalities set in the Nationality enum, which is
+   defined in `player.py`.  
 
 
 After altering these parameters one can check the current settings 
@@ -84,7 +110,7 @@ created by scraping or loaded from the pickle files.
 To view the dataframe use the `displaydataframe` command.
 
 #### Frame methods
-One can various impose filters on the dataframe.  These are
+One can impose various filters on the dataframe.  These are
 contained in the `framemethods.py` file and wrapped as CLI
 commands in `main.py`.  One can add more such filters as desired.
 
@@ -118,9 +144,20 @@ dataframe, Name, career record and highest ranking
  - `plot career_record highest_rankings fitcurve`
    
 ![](readmephotos/photo2.png)
- - `plot nationalresults Tour`
+ - `plot nationalresults Tour` where Tour is one of the 
+supported tournaments set in the Tour enum defined in
+   `tournaments.py`.  For example, the command
+   
+   `plot nationalresults Wimbledon` 
+   
+   yields the horizontal bar plot below:
 
 ![](readmephotos/photo3.png)
+ 
+   where the numbers indicate the number of players to 
+achieve a certain best result in the given tournament
+according to the legend at the bottom of the graph.
+
  - `plot tourresults`
 
 ![](readmephotos/photo4.png)

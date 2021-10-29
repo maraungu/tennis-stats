@@ -8,6 +8,12 @@ from player import Nationality
 from tournaments import Result, Tour
 from matplotlib.patches import Rectangle
 
+"""
+    This file contains the visual data analysis functions
+    for the dataframe wrapped in the plot command from
+    the CLI main file.
+"""
+
 
 # TODO: Make this annotation stuff nicer
 def update_annotations(ind, annotations, scatter_plot, data, x_axis, y_axis):

@@ -3,6 +3,14 @@ import requests
 import pandas
 from bs4 import BeautifulSoup
 
+"""
+    This file contains the wikipedia scraper.  The main function is make_dataframe
+    which takes the soup obtained by the make_player_table function and the 
+    lists of results obtained by the get_record_ranking_tours and returns
+    the desired dataframe.  The make_dataframe function is wrapped as the
+    generatedataframe command in the CLI main file.
+"""
+
 
 def get_html(link):
     """Requests wikipedia link"""
@@ -274,6 +282,7 @@ def get_player_cards(data):
     """
     :param data: dataframe
     :return: List of player cards, i.e. the infoboxes on the top-right corner of the wiki page for each player.
+    They are obtained by 'clicking' on the wikilink of each player in the dataframe.
     """
     player_cards = []
 

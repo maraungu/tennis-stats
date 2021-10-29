@@ -195,7 +195,7 @@ class TennisPlayersShell(cmd.Cmd):
         if arg == 'career record':
             maximum, id_max = framemethods.maximum(self.data['career_record'])
             print('maximum career record: {}% obtained by {}'.format(maximum, self.data['Name'][id_max]))
-        # TODO: potential wip
+        # TODO: potentially do this as well
         elif arg in 'Wimbledon':
             print('maximum number of wins at Wimbledon:')
         else:
