@@ -14,7 +14,8 @@ def birthyear(data, year):
     :param year: str
     :return: dataframe filtered by birthyear
     """
-    data.drop(data[data.Birth < int(year)].index)
+    new_data = data.drop(data[data.Birth < int(year)].index)
+    return new_data
 
 
 def career_record(data, record):
@@ -24,7 +25,8 @@ def career_record(data, record):
     :param record: str
     :return: dataframe filtered by career_record
     """
-    data.drop(data[data.career_record < float(record)].index)
+    new_data = data.drop(data[data.career_record < float(record)].index)
+    return new_data
 
 
 def highest_ranking(data, ranking):
